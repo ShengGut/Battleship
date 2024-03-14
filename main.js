@@ -11,6 +11,9 @@ function createShip(length = 3, hitCount = 0) {
   }
 }
 
+function createGameBoard() {}
+
 module.exports = {
   createShip,
+  createGameBoard,
 }
