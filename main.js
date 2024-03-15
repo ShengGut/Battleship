@@ -11,6 +11,13 @@ function createShip(length = 3, hitCount = 0) {
   }
 }
 
+function createGameBoard() {}
+
+module.exports = {
+  createShip,
+  createGameBoard,
+}
+
 /* What property should createGameBoard have?
 It should be able to place ships at specific coordinates on a 10x10 grid 
 by calling createShip().
@@ -20,9 +27,3 @@ Keeps track of missed shots so they can be displayed properly
 Should be able to check if all ships are sunk or not
 Public properties should be: tracker for missed shots, check if all ship sunk, receiveAttack(), placing ship
 */
-function createGameBoard() {}
-
-module.exports = {
-  createShip,
-  createGameBoard,
-}
