@@ -1,6 +1,6 @@
 const { createShip, createGameBoard } = require('./main')
 
-describe('Test createShip factory function and the resulting object', () => {
+describe("Test createShip factory function and the object public's properties and method", () => {
   let ship
   const length = 3
 
@@ -8,42 +8,42 @@ describe('Test createShip factory function and the resulting object', () => {
     ship = createShip(length) // arrange
   })
 
-  test('should create an object with the correct attributes', () => {
+  test('should create an object with the correct public properties and methods', () => {
     // assert
     expect(ship).toHaveProperty('length', length)
-    expect(ship).toHaveProperty('hitCount', 0)
     expect(ship).toHaveProperty('isSunk')
     expect(ship).toHaveProperty('hit')
   })
 
-  test('should not be be sunk initially', () => {
+  test('should not be sunk initially', () => {
     const isSunk = ship.isSunk() // act
     expect(isSunk).toBe(false) // assert
   })
 
-  test('should increment counter when hit', () => {
+  test('should not be sunk after being hit fewer times than its length', () => {
     ship.hit() // act
-    expect(ship.hitCount).toBe(1) // assert
+    expect(ship.isSunk()).toBe(false) // assert
+
+    ship.hit() // act
+    expect(ship.isSunk()).toBe(false) // assert
   })
 
-  test('should not be sunk until hitCount equals length', () => {
+  test('should be sunk after being hit a number of times equal to its length', () => {
     ship.hit() // act
-    expect(ship.isSunk()).toBe(false) // assert
-
     ship.hit() // act
-    expect(ship.isSunk()).toBe(false) // assert
-
     ship.hit() // act
     expect(ship.isSunk()).toBe(true) // assert
   })
 })
 
-describe('Test createGameBoard factory function and the resulting object', () => {
+describe("Test createGameBoard factory function and the object public's properties and method", () => {
   let gameboard
   const ships = createShip()
 
   beforeEach(() => {
     gameBoard = createGameBoard() // arrange
   })
-  test('should create an object with the correct attributes', () => {})
+  test('should create an object with the correct attributes', () => {
+    // expect(gameBoard).toHaveProperty()
+  })
 })
