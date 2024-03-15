@@ -59,7 +59,73 @@ function createGameBoard() {
   }
 }
 
+function createPlayer(isAI = false) {
+  return {
+    isAI,
+    generateRandomCoordinates(enemyGameBoard) {
+      // helper function for AI
+      let row, col
+      let cell
+      do {
+        row = Math.floor(Math.random() * 10)
+        col = Math.floor(Math.random() * 10)
+        cell = `${row}-${col}`
+      } while (
+        enemyGameBoard.missedAttacks.some(
+          (coord) => coord.row === row && coord.col === col
+        ) ||
+        enemyGameBoard.grid[cell]
+      )
+      return { row, col }
+    },
+    takeTurn(attackCoordinates, enemyGameBoard) {
+      if (this.isAI) {
+        attackCoordinates = this.generateRandomCoordinates(enemyGameBoard)
+      }
+      if (this.isLegalMove(attackCoordinates, enemyGameBoard)) {
+        enemyGameBoard.receiveAttack(attackCoordinates)
+      }
+    },
+    isLegalMove(attackCoordinates, enemyGameBoard) {
+      const { row, col } = attackCoordinates
+      const cell = `${row}-${col}`
+      return (
+        row >= 0 &&
+        row < 10 &&
+        col >= 0 &&
+        col < 10 &&
+        !enemyGameBoard.missedAttacks.some(
+          (coord) => coord.row === row && coord.col === col
+        ) &&
+        !enemyGameBoard.grid[cell]
+      )
+    },
+  }
+}
+
 module.exports = {
   createShip,
   createGameBoard,
+  createPlayer,
 }
+
+// Public interfaces/properties? -> is it player's turn to attack?
+//-> can player make valid move attacking coordinate on enemy gameBoard?
+//-> test if player make invalid move attacking invalid move? (should check missedAttacks in createGameBoard)
+//-> Takes turn attacking enemy gameBoard
+//-> Test when player attacks a coordinate, receiveAttack is correctly called
+// Test that player receives feedback whether the attack was a hit or miss
+
+// fetches coordinates
+// check if isAI === true
+// check if Math.random coordinates has been hit or not
+// if it is hit, re-generate and recursively call attackCoordinates?
+// if it is not hit, call receiveAttack with Math.random coordinates
+// Give feedback if attack was a hit or a miss
+// set playerTurn to false so next player e.g. player2 can start their turn.
+// else if isAI === false
+// check if coordinate has been hit or not
+// if it is hit, make it invalid and tell the user it is not a valid move
+// if it is not hit, call receiveAttack() with player-fed coordinates
+// give feedback if attack was a hit or a miss
+// set playerTurn to false so next player e.g. player2 can start their turn.

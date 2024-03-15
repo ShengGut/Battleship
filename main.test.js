@@ -1,6 +1,6 @@
-const { createShip, createGameBoard } = require('./main')
+const { createShip, createGameBoard, createPlayer } = require('./main')
 
-describe("Test createShip factory function and the object public's properties and method", () => {
+describe("Test createShip factory function and the object public's properties and methods", () => {
   let ship
   const shipLength = 3
 
@@ -36,7 +36,7 @@ describe("Test createShip factory function and the object public's properties an
   })
 })
 
-describe("Test createGameBoard factory function and the object public's properties and method", () => {
+describe("Test createGameBoard factory function and the object public's properties and methods", () => {
   let gameBoard
   const shipLength = 3
 
@@ -45,9 +45,9 @@ describe("Test createGameBoard factory function and the object public's properti
   })
   test('should create an object with the correct attributes', () => {
     expect(gameBoard).toHaveProperty('placeShip')
-    // expect(gameboard).toHaveProperty('receiveAttack')
-    // expect(gameboard).toHaveProperty('areAllShipsSunk')
-    // expect(gameboard).toHaveProperty('getMissedAttacks')
+    expect(gameBoard).toHaveProperty('receiveAttack')
+    expect(gameBoard).toHaveProperty('areAllShipsSunk')
+    expect(gameBoard).toHaveProperty('getMissedAttacks')
   })
 
   test('should be able to place a ship at specific coordinates', () => {
@@ -103,5 +103,32 @@ describe("Test createGameBoard factory function and the object public's properti
     gameBoard.receiveAttack({ row: 1, col: 2 })
 
     expect(gameBoard.areAllShipsSunk()).toBe(true)
+  })
+})
+
+describe("Test createPlayer factory function and the object's public properties and methods", () => {
+  let player
+  let enemyGameBoard
+
+  beforeEach(() => {
+    player = createPlayer()
+    enemyGameBoard = createGameBoard()
+  })
+
+  test('should create an object with the correct properties', () => {
+    expect(player).toHaveProperty('takeTurn')
+    expect(player).toHaveProperty('isLegalMove')
+  })
+
+  test('should be able to take a turn and attack the enemy gameboard', () => {
+    const attackCoordinates = { row: 0, col: 0 }
+    player.takeTurn(attackCoordinates, enemyGameBoard)
+    expect(enemyGameBoard.getMissedAttacks()).toContainEqual(attackCoordinates)
+  })
+  test('should not allow attacking the same coordinates twices', () => {
+    const attackCoordinates = { row: 0, col: 0 }
+    player.takeTurn(attackCoordinates, enemyGameBoard)
+    player.takeTurn(attackCoordinates, enemyGameBoard)
+    expect(player.isLegalMove(attackCoordinates, enemyGameBoard)).toBe(false)
   })
 })
