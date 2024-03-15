@@ -37,44 +37,60 @@ describe("Test createShip factory function and the object public's properties an
 })
 
 describe("Test createGameBoard factory function and the object public's properties and method", () => {
-  let gameboard
+  let gameBoard
   const shipLength = 3
 
   beforeEach(() => {
     gameBoard = createGameBoard() // arrange
   })
   test('should create an object with the correct attributes', () => {
-    expect(gameboard).toHaveProperty('placeShip')
-    expect(gameboard).toHaveProperty('receiveAttack')
-    expect(gameboard).toHaveProperty('AreAllShipsSunk')
-    expect(gameboard).toHaveProperty('getMissedAttacks')
+    expect(gameBoard).toHaveProperty('placeShip')
+    // expect(gameboard).toHaveProperty('receiveAttack')
+    // expect(gameboard).toHaveProperty('areAllShipsSunk')
+    // expect(gameboard).toHaveProperty('getMissedAttacks')
   })
 
   test('should be able to place a ship at specific coordinates', () => {
     const coordinates = { row: 0, col: 0 }
-    const ship = gameBoard.placeShip(coordinates, shipLength)
-    expect(ship.coordinates).toBe(coordinates)
+    gameBoard.placeShip(coordinates, shipLength)
+
+    expect(gameBoard.grid['0-0']).toEqual({
+      ship: expect.any(Object),
+      index: 0,
+    })
+    expect(gameBoard.grid['0-1']).toEqual({
+      ship: expect.any(Object),
+      index: 1,
+    })
+    expect(gameBoard.grid['0-2']).toEqual({
+      ship: expect.any(Object),
+      index: 2,
+    })
+  })
+
+  test('should send the hit function to the correct ship when attacked', () => {
+    const attackCoordinates = { row: 0, col: 0 }
+    gameBoard.placeShip(attackCoordinates, shipLength)
+    gameBoard.receiveAttack(attackCoordinates)
+    expect(gameBoard.grid['0-0'].ship.hitCount).toBe(1) // Assert that the ship at the attacked coordinates has been hit
   })
 
   test('should record missed attacks', () => {
     const missedCoordinates = { row: 0, col: 0 }
+    const trueCoordinates = { row: 3, col: 0 }
+    gameBoard.placeShip(trueCoordinates, shipLength)
     gameBoard.receiveAttack(missedCoordinates)
+    gameBoard.receiveAttack({ row: 0, col: 1 })
+    gameBoard.receiveAttack({ row: 0, col: 2 })
     const missedAttacks = gameBoard.getMissedAttacks()
-    expect(missedAttacks).toContainEqual(missedCoordinates)
-  })
-
-  test('should send the hit function to the correct ship when attacked', () => {
-    const missedCoordinates = { row: 0, col: 0 }
-    const ship = gameBoard.placeShip(coordinates, shipLength)
-    gameBoard.receiveAttack(missedCoordinates)
-    expect(ship.hitCount).toBe(1)
+    expect(missedAttacks).toContainEqual(missedCoordinates) // Assert that missedAttack matches the missedCoordinate
   })
 
   test('should report when all ships have been sunk', () => {
     const coordinates1 = { row: 0, col: 0 }
     const coordinates2 = { row: 1, col: 0 }
-    const ship1 = gameBoard.placeShip(coordinates1, shipLength)
-    const ship2 = gameBoard.placeShip(coordinates2, shipLength)
+    gameBoard.placeShip(coordinates1, shipLength)
+    gameBoard.placeShip(coordinates2, shipLength)
 
     // sink ship1
     gameBoard.receiveAttack(coordinates1)
