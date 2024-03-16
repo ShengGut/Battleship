@@ -6,7 +6,7 @@ function createShip(length = 3, hitCount = 0) {
       return this.hitCount >= this.length
     },
     hit() {
-      return this.hitCount++
+      this.hitCount++
     },
   }
 }
@@ -30,7 +30,7 @@ function createGameBoard() {
       for (let i = col; i < col + shipLength; i++) {
         const cell = `${row}-${i}` // grid stores the location in the string format 'row-col'
         if (grid[cell]) throw new Error('Ship overlaps with another ship')
-        else grid[cell] = { ship, index: i - col }
+        else grid[cell] = { ship, index: i - col, hit: false } // Add 'hit' property to each cell
       }
     },
     receiveAttack(coordinates) {
@@ -39,6 +39,14 @@ function createGameBoard() {
       if (grid[cell] && grid[cell].ship) {
         const ship = grid[cell].ship
         ship.hit()
+        grid[cell].hit = true // Set the 'hit' property of the attacked cell to true
+
+        // Update the hitCount for all cells containing the same ship
+        for (const cell in grid) {
+          if (grid[cell] && grid[cell].ship === ship) {
+            grid[cell].ship.hitCount = ship.hitCount
+          }
+        }
       } else {
         missedAttacks.push(coordinates)
       }
@@ -62,31 +70,39 @@ function createGameBoard() {
 function createPlayer(isAI = false) {
   return {
     isAI,
+    gameBoard: createGameBoard(),
     generateRandomCoordinates(enemyGameBoard) {
-      // helper function for AI
+      const attackedCoordinates = new Set()
+
+      for (const cell in enemyGameBoard.grid) {
+        if (enemyGameBoard.grid[cell].hit) {
+          const [row, col] = cell.split('-').map(Number)
+          attackedCoordinates.add(`${row}-${col}`)
+        }
+      }
+
+      for (const missedAttack of enemyGameBoard.missedAttacks) {
+        const { row, col } = missedAttack
+        attackedCoordinates.add(`${row}-${col}`)
+      }
+
       let row, col
-      let cell
       do {
         row = Math.floor(Math.random() * 10)
         col = Math.floor(Math.random() * 10)
-        cell = `${row}-${col}`
-      } while (
-        enemyGameBoard.missedAttacks.some(
-          (coord) => coord.row === row && coord.col === col
-        ) ||
-        enemyGameBoard.grid[cell]
-      )
+      } while (attackedCoordinates.has(`${row}-${col}`))
+
       return { row, col }
     },
-    takeTurn(attackCoordinates, enemyGameBoard) {
+    attack(attackCoordinates, enemyGameBoard) {
       if (this.isAI) {
         attackCoordinates = this.generateRandomCoordinates(enemyGameBoard)
       }
-      if (this.isLegalMove(attackCoordinates, enemyGameBoard)) {
+      if (this.isValidAttack(attackCoordinates, enemyGameBoard)) {
         enemyGameBoard.receiveAttack(attackCoordinates)
       }
     },
-    isLegalMove(attackCoordinates, enemyGameBoard) {
+    isValidAttack(attackCoordinates, enemyGameBoard) {
       const { row, col } = attackCoordinates
       const cell = `${row}-${col}`
       return (
@@ -94,11 +110,21 @@ function createPlayer(isAI = false) {
         row < 10 &&
         col >= 0 &&
         col < 10 &&
-        !enemyGameBoard.missedAttacks.some(
-          (coord) => coord.row === row && coord.col === col
-        ) &&
-        !enemyGameBoard.grid[cell]
+        !enemyGameBoard.missedAttacks.includes(cell) &&
+        !(
+          enemyGameBoard.grid[cell] &&
+          enemyGameBoard.grid[cell].ship &&
+          enemyGameBoard.grid[cell].hit
+        )
       )
+    },
+    checkForWinner(enemyGameBoard) {
+      if (enemyGameBoard.areAllShipsSunk()) {
+        return 'Winner'
+      } else if (this.gameBoard.areAllShipsSunk()) {
+        return 'Loser'
+      }
+      return null
     },
   }
 }
@@ -108,24 +134,3 @@ module.exports = {
   createGameBoard,
   createPlayer,
 }
-
-// Public interfaces/properties? -> is it player's turn to attack?
-//-> can player make valid move attacking coordinate on enemy gameBoard?
-//-> test if player make invalid move attacking invalid move? (should check missedAttacks in createGameBoard)
-//-> Takes turn attacking enemy gameBoard
-//-> Test when player attacks a coordinate, receiveAttack is correctly called
-// Test that player receives feedback whether the attack was a hit or miss
-
-// fetches coordinates
-// check if isAI === true
-// check if Math.random coordinates has been hit or not
-// if it is hit, re-generate and recursively call attackCoordinates?
-// if it is not hit, call receiveAttack with Math.random coordinates
-// Give feedback if attack was a hit or a miss
-// set playerTurn to false so next player e.g. player2 can start their turn.
-// else if isAI === false
-// check if coordinate has been hit or not
-// if it is hit, make it invalid and tell the user it is not a valid move
-// if it is not hit, call receiveAttack() with player-fed coordinates
-// give feedback if attack was a hit or a miss
-// set playerTurn to false so next player e.g. player2 can start their turn.
