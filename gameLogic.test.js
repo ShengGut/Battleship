@@ -1,4 +1,4 @@
-const { createShip, createGameBoard, createPlayer } = require('./main')
+const { createShip, createGameBoard, createPlayer } = require('./gameLogic')
 
 describe("Test createShip factory function and the object public's properties and methods", () => {
   let ship
