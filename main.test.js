@@ -121,7 +121,6 @@ describe("Test createPlayer factory function and the object's public properties 
   test('should create an object with the correct properties', () => {
     expect(player1).toHaveProperty('isAI')
     expect(player1).toHaveProperty('gameBoard')
-    expect(player1).toHaveProperty('generateRandomCoordinates')
     expect(player1).toHaveProperty('attack')
     expect(player1).toHaveProperty('isValidAttack')
   })
@@ -140,15 +139,6 @@ describe("Test createPlayer factory function and the object's public properties 
     player1.attack(attackCoordinates, player2.gameBoard)
     expect(player1.isValidAttack(attackCoordinates, player2.gameBoard)).toBe(
       false
-    )
-  })
-
-  test('should generate valid random attack coordinates for AI player', () => {
-    const randomCoordinates = player2.generateRandomCoordinates(
-      player1.gameBoard
-    )
-    expect(player2.isValidAttack(randomCoordinates, player1.gameBoard)).toBe(
-      true
     )
   })
 
