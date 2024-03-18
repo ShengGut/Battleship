@@ -93,3 +93,44 @@ textarea:not([rows]) {
 :target {
   scroll-margin-block: 5ex;
 }
+
+.game-container {
+  --max-width: 1600px;
+  --padding: 1rem;
+  width: min(var(--max-width), 100% - var(--padding));
+  margin-inline: auto;
+}
+
+.even-columns {
+  display: grid;
+  gap: 1rem;
+  margin: 2rem;
+  text-align: center;
+}
+
+@media (min-width: 50em) {
+  .even-columns {
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+  }
+}
+
+main {
+  padding: 50px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 500px;
+  height: 500px;
+  margin: 0 auto;
+}
+
+td {
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 3em;
+  border: 1px solid white;
+}
