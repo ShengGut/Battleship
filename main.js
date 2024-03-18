@@ -213,6 +213,47 @@ function canPlaceShip(gameBoard, coordinates, shipLength, orientation) {
   return true
 }
 
+function placeAIShips(gameBoard) {
+  const ships = [
+    { name: 'carrier', length: 5 },
+    { name: 'battleship', length: 4 },
+    { name: 'submarine', length: 3 },
+    { name: 'submarine', length: 3 },
+    { name: 'destroyer', length: 2 },
+  ]
+
+  for (const ship of ships) {
+    let validCoordinates = false
+    let row, col
+
+    while (!validCoordinates) {
+      row = Math.floor(Math.random() * 10)
+      col = Math.floor(Math.random() * (10 - ship.length + 1)) // ensure ship fits within bounds
+
+      if (canPlaceShip(gameBoard, { row, col }, ship.length, 'horizontal')) {
+        validCoordinates = true
+        gameBoard.placeShip({ row, col }, ship.length)
+      }
+    }
+  }
+}
+
+function getShipCoordinates(row, col, length, orientation) {
+  const coordinates = []
+
+  if (orientation === 'horizontal') {
+    for (let i = col; i < col + length; i++) {
+      coordinates.push(`${row}-${i}`)
+    }
+  } else {
+    for (let i = row; i < row + length; i++) {
+      coordinates.push(`${i}-${col}`)
+    }
+  }
+
+  return coordinates
+}
+
 const player1Board = document.querySelector('.board.p1')
 const player2Board = document.querySelector('.board.p2')
 
@@ -220,21 +261,16 @@ const player1 = createPlayer()
 const player2 = createPlayer(true) // AI player
 
 placingShips()
-// Place ships on the game boards (manual)
-// player1.gameBoard.placeShip({ row: 0, col: 0 }, 5)
-// player1.gameBoard.placeShip({ row: 2, col: 2 }, 4)
-// player1.gameBoard.placeShip({ row: 5, col: 5 }, 3)
-// player1.gameBoard.placeShip({ row: 8, col: 1 }, 3)
-// player1.gameBoard.placeShip({ row: 9, col: 6 }, 2)
+placeAIShips(player2.gameBoard)
 
-player2.gameBoard.placeShip({ row: 1, col: 1 }, 5)
-player2.gameBoard.placeShip({ row: 3, col: 3 }, 4)
-player2.gameBoard.placeShip({ row: 6, col: 6 }, 3)
-player2.gameBoard.placeShip({ row: 7, col: 2 }, 3)
-player2.gameBoard.placeShip({ row: 9, col: 8 }, 2)
+// player2.gameBoard.placeShip({ row: 1, col: 1 }, 5)
+// player2.gameBoard.placeShip({ row: 3, col: 3 }, 4)
+// player2.gameBoard.placeShip({ row: 6, col: 6 }, 3)
+// player2.gameBoard.placeShip({ row: 7, col: 2 }, 3)
+// player2.gameBoard.placeShip({ row: 9, col: 8 }, 2)
 
 renderBoard(player1Board, player1.gameBoard, true)
-renderBoard(player2Board, player2.gameBoard, false)
+renderBoard(player2Board, player2.gameBoard, true)
 
 player2Board.addEventListener('click', (event) =>
   handleCellClick(event, player1, player2, player1Board, player2Board)
