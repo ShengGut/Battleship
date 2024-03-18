@@ -151,3 +151,12 @@ td {
   font-size: 20px;
   text-align: center;
 }
+
+.attack-list span {
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.attack-list span.hit {
+  color: green;
+}

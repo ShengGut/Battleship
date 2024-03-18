@@ -87,9 +87,12 @@ function createPlayer(isAI = false) {
       if (this.isAI) {
         const attackCoordinates = huntAndTargetAI(enemyGameBoard)
         const attackResult = enemyGameBoard.receiveAttack(attackCoordinates)
-        if (attackResult)
+        if (attackResult) {
           console.log('AI player: Successful hit:', attackCoordinates)
-        else console.log('AI player: Missed attack:', attackCoordinates)
+        } else {
+          console.log('AI player: Missed attack:', attackCoordinates)
+        }
+        return { attackCoordinates, attackResult }
       }
     },
     isValidAttack(attackCoordinates, enemyGameBoard) {

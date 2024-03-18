@@ -34,12 +34,22 @@ function handleCellClick(
       )
       renderBoard(enemyBoardElement, enemyPlayer.gameBoard, false)
 
+      let attackListP1 = document.querySelector('.attack-list.p1')
+      const attackCoordStr = `[${row}, ${col}], `
+      const attackElement = document.createElement('span')
+
+      attackElement.textContent = attackCoordStr
+
       if (attackResult) {
+        attackElement.classList.add('hit')
         console.log('Successful hit!')
       } else {
         console.log('Missed attack:')
       }
 
+      if (player === player1 && attackListP1) {
+        attackListP1.appendChild(attackElement)
+      }
       const winner = player.checkForWinner(enemyPlayer.gameBoard)
       if (winner) {
         alert(`${winner} wins!`)
@@ -48,8 +58,24 @@ function handleCellClick(
       } else {
         // Switch turns
         setTimeout(() => {
-          enemyPlayer.autoAttack(player.gameBoard)
+          const { attackCoordinates, attackResult } = enemyPlayer.autoAttack(
+            player.gameBoard
+          )
           renderBoard(playerBoardElement, player.gameBoard, true)
+
+          let attackListP2 = document.querySelector('.attack-list.p2')
+          const { row, col } = attackCoordinates
+          const attackCoordString = `[${row}, ${col}]`
+          const attackElement = document.createElement('span')
+          attackElement.textContent = attackCoordString
+
+          if (attackResult) {
+            attackElement.classList.add('hit')
+          }
+
+          if (attackListP2) {
+            attackListP2.appendChild(attackElement)
+          }
 
           const winner = enemyPlayer.checkForWinner(player.gameBoard)
           if (winner) {
