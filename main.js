@@ -238,22 +238,6 @@ function placeAIShips(gameBoard) {
   }
 }
 
-function getShipCoordinates(row, col, length, orientation) {
-  const coordinates = []
-
-  if (orientation === 'horizontal') {
-    for (let i = col; i < col + length; i++) {
-      coordinates.push(`${row}-${i}`)
-    }
-  } else {
-    for (let i = row; i < row + length; i++) {
-      coordinates.push(`${i}-${col}`)
-    }
-  }
-
-  return coordinates
-}
-
 const player1Board = document.querySelector('.board.p1')
 const player2Board = document.querySelector('.board.p2')
 
