@@ -14,6 +14,9 @@ const gameBoard = () => {
     '', '', '', '', '', '', '', '', '', '',
     '', '', '', '', '', '', '', '', '', '']
 }
+
+let gameOver = false
+
 function handleCellClick(
   event,
   player,
@@ -21,6 +24,7 @@ function handleCellClick(
   playerBoardElement,
   enemyBoardElement
 ) {
+  if (gameOver) return
   const cell = event.target
   const row = cell.parentNode.rowIndex
   const col = cell.cellIndex
@@ -53,8 +57,8 @@ function handleCellClick(
       const winner = player.checkForWinner(enemyPlayer.gameBoard)
       if (winner) {
         alert(`${winner} wins!`)
-
-        // Reset the game or perform any other necessary actions
+        gameOver = true
+        player2Board.removeEventListener('click', handleCellClick)
       } else {
         // Switch turns
         setTimeout(() => {
@@ -81,7 +85,8 @@ function handleCellClick(
           if (winner) {
             alert(`${winner} wins!`)
             renderBoard(enemyBoardElement, enemyPlayer.gameBoard, true)
-            // Reset the game or perform any other necessary actions
+            gameOver = true
+            player2Board.removeEventListener('click', handleCellClick)
           }
         }, 500) // Delay the AI player's turn by 500ms for better user experience
       }
