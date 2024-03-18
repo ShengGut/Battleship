@@ -14,7 +14,6 @@ const gameBoard = () => {
     '', '', '', '', '', '', '', '', '', '',
     '', '', '', '', '', '', '', '', '', '']
 }
-
 function handleCellClick(
   event,
   player,
@@ -27,35 +26,44 @@ function handleCellClick(
   const col = cell.cellIndex
   const attackCoordinates = { row, col }
 
-  if (player.isValidAttack(attackCoordinates, enemyPlayer.gameBoard)) {
-    const attackResult = player.attack(attackCoordinates, enemyPlayer.gameBoard)
-    renderBoard(enemyBoardElement, enemyPlayer.gameBoard)
+  if (cell.getAttribute('data-attacked') !== 'true') {
+    if (player.isValidAttack(attackCoordinates, enemyPlayer.gameBoard)) {
+      const attackResult = player.attack(
+        attackCoordinates,
+        enemyPlayer.gameBoard
+      )
+      renderBoard(enemyBoardElement, enemyPlayer.gameBoard, false)
 
-    if (attackResult) {
-      console.log('Successful hit!')
-    } else {
-      console.log('Missed attack.')
-    }
-
-    const winner = player.checkForWinner(enemyPlayer.gameBoard)
-    if (winner) {
-      alert(`${winner} wins!`)
-      // Reset the game or perform any other necessary actions
-    } else if (player.isAI) {
-      // AI player's turn
-      player.attack(null, enemyPlayer.gameBoard)
-      renderBoard(playerBoardElement, player.gameBoard)
+      if (attackResult) {
+        console.log('Successful hit!')
+      } else {
+        console.log('Missed attack:')
+      }
 
       const winner = player.checkForWinner(enemyPlayer.gameBoard)
       if (winner) {
         alert(`${winner} wins!`)
+
         // Reset the game or perform any other necessary actions
+      } else {
+        // Switch turns
+        setTimeout(() => {
+          enemyPlayer.autoAttack(player.gameBoard)
+          renderBoard(playerBoardElement, player.gameBoard, true)
+
+          const winner = enemyPlayer.checkForWinner(player.gameBoard)
+          if (winner) {
+            alert(`${winner} wins!`)
+            renderBoard(enemyBoardElement, enemyPlayer.gameBoard, true)
+            // Reset the game or perform any other necessary actions
+          }
+        }, 500) // Delay the AI player's turn by 500ms for better user experience
       }
     }
   }
 }
 
-function renderBoard(boardElement, gameBoard) {
+function renderBoard(boardElement, gameBoard, isPlayerBoard) {
   const boardTable = document.createElement('table')
 
   for (let row = 0; row < 10; row++) {
@@ -65,7 +73,7 @@ function renderBoard(boardElement, gameBoard) {
       const tableCell = document.createElement('td')
       const cell = gameBoard.grid[`${row}-${col}`]
 
-      if (cell && cell.ship) {
+      if (isPlayerBoard && cell && cell.ship) {
         tableCell.classList.add('ship')
         tableCell.style.backgroundColor = `hsl(${cell.ship.length * 60}, 100%, 50%)`
       }
@@ -75,6 +83,7 @@ function renderBoard(boardElement, gameBoard) {
         tableCell.style.backgroundColor = 'rgba(255, 0, 0, 0.7)'
         tableCell.style.backgroundImage =
           'linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.7) 45%, rgba(255, 255, 255, 0.7) 55%, transparent 55%)'
+        tableCell.setAttribute('data-attacked', 'true')
       } else if (
         gameBoard.missedAttacks.some(
           (coord) => coord.row === row && coord.col === col
@@ -82,6 +91,7 @@ function renderBoard(boardElement, gameBoard) {
       ) {
         tableCell.classList.add('miss')
         tableCell.textContent = '•'
+        tableCell.setAttribute('data-attacked', 'true')
       }
 
       tableRow.appendChild(tableCell)
@@ -112,8 +122,8 @@ player2.gameBoard.placeShip({ row: 6, col: 6 }, 3)
 player2.gameBoard.placeShip({ row: 7, col: 2 }, 3)
 player2.gameBoard.placeShip({ row: 9, col: 8 }, 2)
 
-renderBoard(player1Board, player1.gameBoard)
-renderBoard(player2Board, player2.gameBoard)
+renderBoard(player1Board, player1.gameBoard, true)
+renderBoard(player2Board, player2.gameBoard, false)
 
 player2Board.addEventListener('click', (event) =>
   handleCellClick(event, player1, player2, player1Board, player2Board)

@@ -83,6 +83,15 @@ function createPlayer(isAI = false) {
       }
       return false
     },
+    autoAttack(enemyGameBoard) {
+      if (this.isAI) {
+        const attackCoordinates = huntAndTargetAI(enemyGameBoard)
+        const attackResult = enemyGameBoard.receiveAttack(attackCoordinates)
+        if (attackResult)
+          console.log('AI player: Successful hit:', attackCoordinates)
+        else console.log('AI player: Missed attack:', attackCoordinates)
+      }
+    },
     isValidAttack(attackCoordinates, enemyGameBoard) {
       const { row, col } = attackCoordinates
       const cell = `${row}-${col}`
@@ -101,9 +110,9 @@ function createPlayer(isAI = false) {
     },
     checkForWinner(enemyGameBoard) {
       if (enemyGameBoard.areAllShipsSunk()) {
-        return 'Winner'
+        return 'Player 1'
       } else if (this.gameBoard.areAllShipsSunk()) {
-        return 'Loser'
+        return 'Player 2'
       }
       return null
     },
@@ -111,96 +120,99 @@ function createPlayer(isAI = false) {
 }
 
 function huntAndTargetAI(enemyGameBoard) {
-  const hitCoordinates = [] // for storing successful hits coordinates
-  const potentialTargets = [] // for storing potential target coordinates
+  let hitCoordinates = [] // for storing successful hits coordinates
+  let potentialTargets = [] // for storing potential target coordinates
+  let direction = null // for storing the direction of the ship
 
-  // This is a helper function for the hunt phase, or search, where it randomly attacks a tile until a ship is hit
-  function selectRandomUnattackedCoordinate() {
-    const attackedCoordinates = new Set()
-
-    for (const cell in enemyGameBoard.grid) {
-      if (enemyGameBoard.grid[cell].hit) {
-        const [row, col] = cell.split('-').map(Number)
-        attackedCoordinates.add(`${row}-${col}`)
-      }
+  // Check for any successful hits that haven't been fully explored
+  for (const cell in enemyGameBoard.grid) {
+    if (
+      enemyGameBoard.grid[cell] &&
+      enemyGameBoard.grid[cell].hit &&
+      !enemyGameBoard.grid[cell].ship.isSunk()
+    ) {
+      const [row, col] = cell.split('-').map(Number)
+      hitCoordinates.push({ row, col })
     }
-
-    for (const missedAttack of enemyGameBoard.missedAttacks) {
-      const { row, col } = missedAttack
-      attackedCoordinates.add(`${row}-${col}`)
-    }
-
-    let row, col
-    do {
-      row = Math.floor(Math.random() * 10)
-      col = Math.floor(Math.random() * 10)
-    } while (attackedCoordinates.has(`${row}-${col}`))
-
-    return { row, col }
-  }
-  // this is a helper function to generate adjacent directions for targeting a ship when found
-  function generateAdjacentCoordinates(coordinate) {
-    const { row, col } = coordinate
-    const adjacentCoordinates = []
-
-    const directions = [
-      { row: -1, col: 0 }, // up
-      { row: 0, col: 1 }, // right
-      { row: 1, col: 0 }, // left
-      { row: 0, col: -1 }, // down
-    ]
-    for (const direction of directions) {
-      const newRow = row + direction.row
-      const newCOl = col + direction.cik
-    }
-
-    if (newRow >= 0 && newRow < 10 && newCOl >= 0 && newCol < 10) {
-      adjacentCoordinates.push({ row: newRow, col: newCol })
-    }
-    return adjacentCoordinates
   }
 
-  // main loop while the game is in play
-  while (!enemyGameBoard.areAllShipsSunk()) {
-    let coordinate
+  // If there are at least two successful hits, determine the direction
+  if (hitCoordinates.length >= 2) {
+    const [hit1, hit2] = hitCoordinates
+    if (hit1.row === hit2.row) {
+      direction = 'horizontal'
+    } else if (hit1.col === hit2.col) {
+      direction = 'vertical'
+    }
+  }
 
-    if (hitCoordinates.length === 0) {
-      // if no ships are hit, look in hunt phase
-      coordinate = selectRandomUnattackedCoordinate()
+  // If there are successful hits, explore adjacent cells
+  while (hitCoordinates.length > 0) {
+    const { row, col } = hitCoordinates.shift()
+    const adjacentCells = []
+
+    if (direction === 'horizontal') {
+      adjacentCells.push(
+        { row, col: col - 1 }, // Left
+        { row, col: col + 1 } // Right
+      )
+    } else if (direction === 'vertical') {
+      adjacentCells.push(
+        { row: row - 1, col }, // Up
+        { row: row + 1, col } // Down
+      )
     } else {
-      // if a ship is hit switch to target phase
-      if (potentialTargets.length === 0) {
-        const lastHitCoordinate = hitCoordinates[hitCoordinates.length - 1]
-        potentialTargets.push(...generateAdjacentCoordinates(lastHitCoordinate)) // generates adjacent coordinates to hit next
-
-        // remove already attacked coordinates from potentialTargets
-        potentialTargets = potentialTargets.filter(
-          (coord) =>
-            !enemyGameBoard.missedAttacks.some(
-              (missedAttack) =>
-                missedAttack.row == coord.row && missedAttack.col === coord.col
-            ) &&
-            !(
-              enemyGameBoard.grid[`${coord.row}-${coord.col}`] &&
-              enemyGameBoard.grid[`${coord.row}-${coord.col}`].hit
-            )
-        )
-      }
-
-      coordinate = potentialTargets.pop() // select next coordinate to attack after pop
+      adjacentCells.push(
+        { row: row - 1, col }, // Up
+        { row: row + 1, col }, // Down
+        { row, col: col - 1 }, // Left
+        { row, col: col + 1 } // Right
+      )
     }
 
-    const result = enemyGameBoard.receiveAttack(coordinate)
+    // Filter out invalid and already attacked coordinates
+    const validAdjacentCells = adjacentCells.filter(({ row, col }) => {
+      const cell = `${row}-${col}`
+      return (
+        row >= 0 &&
+        row < 10 &&
+        col >= 0 &&
+        col < 10 &&
+        !enemyGameBoard.missedAttacks.some(
+          (coord) => coord.row === row && coord.col === col
+        ) &&
+        !(enemyGameBoard.grid[cell] && enemyGameBoard.grid[cell].hit)
+      )
+    })
 
-    // if hit, push the coordinate
-    if (result) hitCoordinates.push(coordinate)
-    // else if the attack is a miss, remove the last hit coordinate
-    else if (potentialTargets.length === 0) hitCoordinates.pop()
+    // Add valid adjacent cells to potential targets
+    potentialTargets.push(...validAdjacentCells)
   }
 
-  return enemyGameBoard
-}
+  // If there are potential targets, return the first one
+  if (potentialTargets.length > 0) {
+    return potentialTargets.shift()
+  }
 
+  // If no potential targets, randomly select an unattacked cell
+  const unattackedCells = []
+  for (let row = 0; row < 10; row++) {
+    for (let col = 0; col < 10; col++) {
+      const cell = `${row}-${col}`
+      if (
+        !enemyGameBoard.missedAttacks.some(
+          (coord) => coord.row === row && coord.col === col
+        ) &&
+        !(enemyGameBoard.grid[cell] && enemyGameBoard.grid[cell].hit)
+      ) {
+        unattackedCells.push({ row, col })
+      }
+    }
+  }
+
+  const randomIndex = Math.floor(Math.random() * unattackedCells.length)
+  return unattackedCells[randomIndex]
+}
 // ES6 export syntax
 export { createShip, createGameBoard, createPlayer }
 
