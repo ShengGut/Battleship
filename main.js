@@ -88,7 +88,7 @@ function handleCellClick(
             gameOver = true
             player2Board.removeEventListener('click', handleCellClick)
           }
-        }, 500) // Delay the AI player's turn by 500ms for better user experience
+        }, 500) // delay the AI player's turn by 500ms for better user experience
       }
     }
   }
@@ -134,18 +134,98 @@ function renderBoard(boardElement, gameBoard, isPlayerBoard) {
   boardElement.appendChild(boardTable)
 }
 
+// This function prompts the player to place ships
+function placingShips() {
+  const ships = [
+    { name: 'carrier', length: 5 },
+    { name: 'battleship', length: 4 },
+    { name: 'submarine', length: 3 },
+    { name: 'submarine', length: 3 },
+    { name: 'destroyer', length: 2 },
+  ]
+
+  let currentShipIndex = 0
+  const playerBoard = document.querySelector('.board.p1')
+  const messageContainer = document.querySelector('.message-container')
+
+  function displayMessage(message) {
+    messageContainer.textContent = message
+  }
+
+  function handleCellClick(event) {
+    const row = event.target.parentNode.rowIndex
+    const col = event.target.cellIndex
+    const ship = ships[currentShipIndex]
+
+    if (
+      row < 0 ||
+      row >= 10 ||
+      col < 0 ||
+      col + ship.length > 10 ||
+      !canPlaceShip(player1.gameBoard, { row, col }, ship.length, 'horizontal')
+    ) {
+      displayMessage('Invalid placement. Please try again.')
+      return
+    }
+
+    player1.gameBoard.placeShip({ row, col }, ship.length)
+    renderBoard(playerBoard, player1.gameBoard, true)
+
+    currentShipIndex++
+
+    if (currentShipIndex === ships.length) {
+      playerBoard.removeEventListener('click', handleCellClick)
+      displayMessage(
+        'All ships placed! Click the enemy board to start the game.'
+      )
+    } else {
+      const shipName = ships[currentShipIndex].name
+      displayMessage(
+        `Place your ${shipName} (length ${ships[currentShipIndex].length}).`
+      )
+    }
+  }
+
+  playerBoard.addEventListener('click', handleCellClick)
+  displayMessage('Place your carrier (length 5).')
+}
+
+// Helper function to check if a ship can be placed at the given coordinates
+function canPlaceShip(gameBoard, coordinates, shipLength, orientation) {
+  const { row, col } = coordinates
+
+  if (orientation === 'horizontal') {
+    if (col + shipLength > 10) return false
+
+    for (let i = col; i < col + shipLength; i++) {
+      const cell = `${row}-${i}`
+      if (gameBoard.grid[cell]) return false
+    }
+  } else {
+    if (row + shipLength > 10) return false
+
+    for (let i = row; i < row + shipLength; i++) {
+      const cell = `${i}-${col}`
+      if (gameBoard.grid[cell]) return false
+    }
+  }
+
+  return true
+}
+
 const player1Board = document.querySelector('.board.p1')
 const player2Board = document.querySelector('.board.p2')
 
 const player1 = createPlayer()
 const player2 = createPlayer(true) // AI player
 
-// Place ships on the game boards (you can use predetermined coordinates for now)
-player1.gameBoard.placeShip({ row: 0, col: 0 }, 5)
-player1.gameBoard.placeShip({ row: 2, col: 2 }, 4)
-player1.gameBoard.placeShip({ row: 5, col: 5 }, 3)
-player1.gameBoard.placeShip({ row: 8, col: 1 }, 3)
-player1.gameBoard.placeShip({ row: 9, col: 6 }, 2)
+placingShips()
+// Place ships on the game boards (manual)
+// player1.gameBoard.placeShip({ row: 0, col: 0 }, 5)
+// player1.gameBoard.placeShip({ row: 2, col: 2 }, 4)
+// player1.gameBoard.placeShip({ row: 5, col: 5 }, 3)
+// player1.gameBoard.placeShip({ row: 8, col: 1 }, 3)
+// player1.gameBoard.placeShip({ row: 9, col: 6 }, 2)
 
 player2.gameBoard.placeShip({ row: 1, col: 1 }, 5)
 player2.gameBoard.placeShip({ row: 3, col: 3 }, 4)

@@ -135,7 +135,7 @@ td {
   border: 1px solid white;
 }
 
-/* .hit {
+.hit {
   background-color: rgba(255, 0, 0, 0.7);
   background-image: linear-gradient(
     45deg,
@@ -144,7 +144,7 @@ td {
     rgba(255, 255, 255, 0.7) 55%,
     transparent 55%
   );
-} */
+}
 
 .miss {
   color: white;
@@ -157,6 +157,10 @@ td {
   margin-right: 5px;
 }
 
-.attack-list span.hit {
+/* .attack-list span.hit {
   color: green;
+} */
+
+.message-container {
+  color: lightcoral;
 }
