@@ -134,3 +134,20 @@ td {
   font-size: 3em;
   border: 1px solid white;
 }
+
+/* .hit {
+  background-color: rgba(255, 0, 0, 0.7);
+  background-image: linear-gradient(
+    45deg,
+    transparent 45%,
+    rgba(255, 255, 255, 0.7) 45%,
+    rgba(255, 255, 255, 0.7) 55%,
+    transparent 55%
+  );
+} */
+
+.miss {
+  color: white;
+  font-size: 20px;
+  text-align: center;
+}

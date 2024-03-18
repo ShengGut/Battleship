@@ -47,8 +47,10 @@ function createGameBoard() {
             grid[cell].ship.hitCount = ship.hitCount
           }
         }
+        return true
       } else {
         missedAttacks.push(coordinates)
+        return false
       }
     },
     getMissedAttacks() {
@@ -76,8 +78,10 @@ function createPlayer(isAI = false) {
         attackCoordinates = huntAndTargetAI(enemyGameBoard)
       }
       if (this.isValidAttack(attackCoordinates, enemyGameBoard)) {
-        enemyGameBoard.receiveAttack(attackCoordinates)
+        const attackResult = enemyGameBoard.receiveAttack(attackCoordinates)
+        return attackResult
       }
+      return false
     },
     isValidAttack(attackCoordinates, enemyGameBoard) {
       const { row, col } = attackCoordinates
@@ -197,8 +201,12 @@ function huntAndTargetAI(enemyGameBoard) {
   return enemyGameBoard
 }
 
-module.exports = {
-  createShip,
-  createGameBoard,
-  createPlayer,
-}
+// ES6 export syntax
+export { createShip, createGameBoard, createPlayer }
+
+// CommonJS export syntax
+// module.exports = {
+//   createShip,
+//   createGameBoard,
+//   createPlayer,
+// }
