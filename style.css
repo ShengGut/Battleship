@@ -95,7 +95,7 @@ textarea:not([rows]) {
 }
 
 .game-container {
-  --max-width: 1600px;
+  --max-width: 1200px;
   --padding: 1rem;
   width: min(var(--max-width), 100% - var(--padding));
   margin-inline: auto;
@@ -157,10 +157,6 @@ td {
   margin-right: 5px;
 }
 
-/* .attack-list span.hit {
-  color: green;
-} */
-
 .message-container {
   color: lightcoral;
   margin-top: 24px;
@@ -169,3 +165,7 @@ td {
 .attack-list {
   margin-top: 12px;
 }
+
+/* .attack-list span.hit {
+  color: green;
+} */
