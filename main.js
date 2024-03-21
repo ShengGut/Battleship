@@ -249,7 +249,7 @@ placingShips()
 placeAIShips(player2.gameBoard)
 
 renderBoard(player1Board, player1.gameBoard, true)
-renderBoard(player2Board, player2.gameBoard, true)
+renderBoard(player2Board, player2.gameBoard, false)
 
 player2Board.addEventListener('click', (event) =>
   handleCellClick(event, player1, player2, player1Board, player2Board)

@@ -163,4 +163,9 @@ td {
 
 .message-container {
   color: lightcoral;
+  margin-top: 24px;
+}
+
+.attack-list {
+  margin-top: 12px;
 }
