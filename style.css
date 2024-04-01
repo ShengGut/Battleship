@@ -95,7 +95,7 @@ textarea:not([rows]) {
 }
 
 .game-container {
-  --max-width: 1200px;
+  --max-width: 1210px;
   --padding: 1rem;
   width: min(var(--max-width), 100% - var(--padding));
   margin-inline: auto;
